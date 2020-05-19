@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="css/Css.css">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<table id=title>
+		<tr>
+			<td>
+				<img src="img/title_logo.png">
+			</td>
+		</tr>
+	</table>
+	<div id="menuframe">
+		<table id="menu">
+			<tr>
+				<td class="menubtn">소개</td>
+				<td class="menubtn">공지사항</td>
+				<td class="menubtn">입양공고</td>
+				<td class="menubtn">연관기관</td>
+				<td class="menubtn">개발진</td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="img_slide">
+		<div>
+			<img src="img/img1.png" id="imageslide">
+		</div>
+	</div>
+	<div class="mainframe">
+		<div>
+			살려<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+		</div>
+	</div>
+	<script src="js/jquery-3.4.1.min.js"></script>
+	<script>
+		
+		$(document).ready(function() {
+			var jbOffset = $('#menuframe').offset();
+			$(window).scroll(function() {
+				if ($(document).scrollTop() > jbOffset.top) {
+					$('#menuframe').addClass('jbFixed');
+					$('#menu').addClass('jbMenuFixed');
+					console.log("고정")
+				} else {
+					$('#menuframe').removeClass('jbFixed');
+					$('#menu').removeClass('jbMenuFixed');
+				}
+			});
+		});
+		
+		//이미지 슬라이드
+		let num = 1;
+		const imgNum = 3;
+		const img = document.querySelector('#imageslide');
+		
+		
+		//일정 시간이 지날 떄 마다 실행하는 함수
+		//interval: 밀리초 단위(1000 = 1초)
+		setInterval(function(){
+			nextImg();
+		},4000)
+
+		function nextImg(){
+			num++;
+			if(num===imgNum+1){
+				num=1
+			}
+			url = 'img/img'+num+'.png';
+			$('#imageslide').attr("src",url);
+		}
+	</script>
+</body>
+</html>

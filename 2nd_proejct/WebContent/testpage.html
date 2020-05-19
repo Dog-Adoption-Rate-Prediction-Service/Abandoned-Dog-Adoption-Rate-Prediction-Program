@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+</head>
+<body>
+	<a href="https://www.animal.go.kr/front/awtis/public/publicDtl.do?desertionNo=447520202000074
+" title=""
+		onkeypress="this.onclick;">자세히보기</a>
+		
+	<form id="searchList" action="/front/awtis/public/publicList.do" method="POST" onsubmit="return false;">
+	</form>
+	<script type="text/javascript">
+		ajaxErrorHandler();
+
+		$(function() {
+			Calendar.setup({
+				inputField : "searchSDate",
+				eventName : "click",
+				ifFormat : "%Y-%m-%d",
+				showOthers : true,
+				showsTime : false,
+				cache : true
+			});
+
+			Calendar.setup({
+				inputField : "searchEDate",
+				eventName : "click",
+				ifFormat : "%Y-%m-%d",
+				showOthers : true,
+				showsTime : false,
+				cache : true
+			});
+
+			$('#searchSDate, #searchEDate').focus(function() {
+				$(this).trigger('click');
+			});
+
+			//시군
+			$("#searchUprCd")
+					.on(
+							"change",
+							function() {
+								var orgCd = $("#searchOrgCd");
+								var thisValue = $(this).val();
+
+								var optionHtml = "";
+								orgCd.find("option").remove();
+								optionHtml = "<option value=''>전체</option>";
+
+								//시도가 변경되면 보호센터도 초기화 한다.
+								$("#searchCareRegNo").find("option").remove();
+								$("#searchCareRegNo").append(
+										"<option value=''>전체</option>");
+
+								if (thisValue != "") {
+									$
+											.ajax({
+												async : false,
+												type : "post",
+												url : '/front/awtis/comm/selectComOrganTGunList.do',
+												data : "uprCd=" + thisValue,
+												dataType : "json",
+												success : function(dataObj) {
+
+													var data = dataObj.data;
+
+													if (data.length <= 0) {
+													} else {
+														optionHtml = "<option value=''>전체</option>";
+														for (var i = 0; i < data.length; i++) {
+															var codeType = data[i].orgCd;
+															var codeTypeName = data[i].orgdownNm;
+															optionHtml += "<option value='" + codeType + "'>"
+																	+ codeTypeName
+																	+ "</option>";
+														}
+													}
+												}
+											});
+								}
+								orgCd.append(optionHtml);
+							});
+
+			//보호센터
+			$("#searchOrgCd")
+					.on(
+							"change",
+							function() {
+								var htmlId = $("#searchCareRegNo");
+								var searchUprCd = $("#searchUprCd").val();
+								var searchOrgCd = $("#searchOrgCd").val();
+
+								var optionHtml = "";
+								htmlId.find("option").remove();
+								optionHtml = "<option value=''>전체</option>";
+
+								if (searchOrgCd != "") {
+									$
+											.ajax({
+												async : false,
+												type : "post",
+												url : '/front/awtis/comm/selectShelterList.do',
+												data : "searchUprCd="
+														+ searchUprCd
+														+ "&searchOrgCd="
+														+ searchOrgCd,
+												dataType : "json",
+												success : function(dataObj) {
+													var data = dataObj.data;
+													if (data.length <= 0) {
+													} else {
+														optionHtml = "<option value=''>전체</option>";
+														for (var i = 0; i < data.length; i++) {
+															var codeType = data[i].careRegNo;
+															var codeTypeName = data[i].careNm;
+															optionHtml += "<option value='" + codeType + "'>"
+																	+ codeTypeName
+																	+ "</option>";
+														}
+													}
+												}
+											});
+								}
+								htmlId.append(optionHtml);
+							});
+
+			//품종
+			$("#searchUpKindCd")
+					.on(
+							"change",
+							function() {
+								var kindCd = $("#searchKindCd");
+								var thisValue = $(this).val();
+
+								var optionHtml = "";
+								kindCd.find("option").remove();
+								optionHtml = "<option value=''>전체</option>";
+
+								if (thisValue != "") {
+									$
+											.ajax({
+												async : false,
+												type : "post",
+												url : '/front/awtis/comm/selectComKindList.do',
+												data : "upKindCd=" + thisValue,
+												dataType : "json",
+												success : function(dataObj) {
+													var data = dataObj.data;
+													if (data.length <= 0) {
+													} else {
+														optionHtml = "<option value=''>전체</option>";
+														for (var i = 0; i < data.length; i++) {
+															var codeType = data[i].kindCd;
+															var codeTypeName = data[i].kNm;
+															optionHtml += "<option value='" + codeType + "'>"
+																	+ codeTypeName
+																	+ "</option>";
+														}
+													}
+												}
+											});
+								}
+								kindCd.append(optionHtml);
+							});
+
+			//조회버튼
+			$("#search_button")
+					.on(
+							"click",
+							function() {
+								/* JYJ 2019.08.23 날짜 형식 체크 추가 시작 */
+								if (!dtPatternCheck($("#searchSDate").val())) {
+									alert("시작일자 날짜 형식이 올바르지 않습니다..");
+									return false;
+								}
+								if (!dtPatternCheck($("#searchEDate").val())) {
+									alert("종료일자 날짜 형식이 올바르지 않습니다..");
+									return false;
+								}
+								/* JYJ 2019.08.23 날짜 형식 체크 추가 끝 */
+
+								if ($("#searchSDate").val() > $("#searchEDate")
+										.val()) {
+									alert("검색 시작일자가 또는 검색 종료일자가 올바르지 않습니다.\n(시작일자보다 종료일자가 빠름)");
+									return;
+								}
+
+								$("input[name='page']").val(1);
+								$("#searchList").attr("onsubmit", "");
+								$("#searchList").submit();
+							});
+
+			var nowDate = new Date();
+			var nYear = nowDate.getFullYear(); //오늘의 년도
+			var nMonth = nowDate.getMonth() + 1; //오늘의 월 ※ 0월부터 시작
+			var nDate = nowDate.getDate(); //오늘의 날
+			if (nMonth < 10)
+				nMonth = '0' + nMonth;
+			if (nDate < 10)
+				nDate = '0' + nDate;
+			var nowDt = "" + nYear + "-" + nMonth + "-" + nDate;
+
+			nowDate.setMonth(nowDate.getMonth() - 1);
+			var sYear = nowDate.getFullYear(); //오늘의 년도
+			var sMonth = nowDate.getMonth() + 1; //오늘의 월 ※ 0월부터 시작
+			var sDate = nowDate.getDate(); //오늘의 날
+			if (sMonth < 10)
+				sMonth = '0' + sMonth;
+			if (sDate < 10)
+				sDate = '0' + sDate;
+			var setDt = "" + sYear + "-" + sMonth + "-" + sDate;
+
+			//조회조건세팅
+			var searchSDate = "2020-01-01";
+			if (searchSDate == "") {
+				searchSDate = setDt;
+			}
+			var searchEDate = "2020-02-29";
+			if (searchEDate == "") {
+				searchEDate = nowDt;
+			}
+			$("#searchSDate").val(searchSDate);
+			$("#searchEDate").val(searchEDate);
+
+			$("#searchUprCd").val("");
+			$("#searchUprCd").trigger("change");
+			$("#searchOrgCd").val("");
+			$("#searchOrgCd").trigger("change");
+			$("#searchCareRegNo").val("");
+
+			$("#searchUpKindCd").val("");
+			$("#searchUpKindCd").trigger("change");
+			$("#searchKindCd").val("");
+
+			$("#searchState").val("");
+		});
+
+		//상세조회, 보안취약점 위배사항으로 get->post 방식변경 
+		function moveUrl(desertionNo) {
+			var $moveForm = $("#searchList");
+			$("#desertionNo", $moveForm).val(desertionNo);
+			$("#searchList").attr("onsubmit", "");
+			$("#searchList").attr("action", "publicDtl.do");
+			$("#searchList").submit();
+		}
+
+		/* JYJ 2019.08.23 날짜 형식 체크 함수 추가 */
+		function dtPatternCheck(dt) {
+			var pattern = /[0-9]{4}-([0][1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])/;
+			return pattern.test(dt);
+		}
+	</script>
+</body>
+</html>
